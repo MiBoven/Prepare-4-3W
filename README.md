@@ -67,6 +67,11 @@ Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer E
 
 ## Changelog
 
+### 0.2.1 — 2026-09-08
+- Fixed the header: logo, title, and subtitle now live together in one `.brand` block inside `<header>` (matching JPG75), instead of a separate block below the header
+- About modal restyled to match JPG75's structure (plain `<p>`, `.muted`, `.muted.small`, `data-close` button)
+- Renamed dropdown/menu CSS classes to `.menu-dropdown` / `.menu-item` for consistency with the rest of the suite
+
 ### 0.2.0 — 2026-09-08
 - Own favicon set (all files, including `site.webmanifest`) added to the repo root, generated with the app itself
 - Images can now also be pasted from the clipboard (Ctrl+V / Cmd+V), in addition to upload and drag & drop

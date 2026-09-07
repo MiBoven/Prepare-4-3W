@@ -28,24 +28,24 @@ document.getElementById('fullscreenToggle').addEventListener('click', () => {
 // Menu dropdown
 // ======================================================================
 const menuToggle = document.getElementById('menuToggle');
-const dropdown = document.getElementById('dropdown');
+const menuDropdown = document.getElementById('menuDropdown');
 menuToggle.addEventListener('click', (e) => {
   e.stopPropagation();
-  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  menuDropdown.style.display = menuDropdown.style.display === 'block' ? 'none' : 'block';
 });
-document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+document.addEventListener('click', () => { menuDropdown.style.display = 'none'; });
 
 // ---------- About modal ----------
-const aboutModalBg = document.getElementById('aboutModalBg');
-document.getElementById('menuAboutBtn').addEventListener('click', () => {
-  dropdown.style.display = 'none';
-  aboutModalBg.classList.add('open');
+const modalAbout = document.getElementById('modalAbout');
+document.getElementById('menuAbout').addEventListener('click', () => {
+  menuDropdown.style.display = 'none';
+  modalAbout.classList.add('open');
 });
-document.getElementById('closeAboutModal').addEventListener('click', () => {
-  aboutModalBg.classList.remove('open');
+modalAbout.querySelector('[data-close]').addEventListener('click', () => {
+  modalAbout.classList.remove('open');
 });
-aboutModalBg.addEventListener('click', (e) => {
-  if (e.target === aboutModalBg) aboutModalBg.classList.remove('open');
+modalAbout.addEventListener('click', (e) => {
+  if (e.target === modalAbout) modalAbout.classList.remove('open');
 });
 
 // ======================================================================
@@ -53,7 +53,7 @@ aboutModalBg.addEventListener('click', (e) => {
 // ======================================================================
 const homeView = document.getElementById('homeView');
 const faviconView = document.getElementById('faviconView');
-const homeLink = document.getElementById('homeLink');
+const brandHome = document.getElementById('brandHome');
 
 function showHome() {
   faviconView.hidden = true;
@@ -65,7 +65,10 @@ function showFavicon() {
 }
 document.getElementById('openFavicon').addEventListener('click', showFavicon);
 document.getElementById('backBtn').addEventListener('click', showHome);
-homeLink.addEventListener('click', (e) => { e.preventDefault(); showHome(); });
+brandHome.addEventListener('click', showHome);
+brandHome.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showHome(); }
+});
 
 // ======================================================================
 // Favicon tool: state

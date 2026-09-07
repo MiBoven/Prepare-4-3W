@@ -15,36 +15,36 @@
 <body>
 
 <header>
-  <div class="header-icons">
-    <button class="icon" id="fullscreenToggle" title="Fullscreen">⛶</button>
+  <div class="brand" id="brandHome" title="Home" role="button" tabindex="0">
+    <img src="/logo.png" alt="" class="brand-logo">
+    <div>
+      <h1>Prepare 4 3W</h1>
+      <p class="sub">So you can let surf the WWW</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="icon" id="fullscreenToggle" title="Toggle fullscreen">⛶</button>
     <div class="menu-wrap">
-      <button class="icon" id="menuToggle" title="Menu">☰</button>
-      <div class="dropdown" id="dropdown">
-        <button type="button" class="dropdown-item" id="menuThemeToggle">
+      <button class="icon" id="menuToggle" title="Menu">⋮</button>
+      <div class="menu-dropdown" id="menuDropdown" style="display:none;">
+        <button class="menu-item" id="menuThemeToggle">
           <span>Dark mode</span>
           <span class="switch" id="themeSwitch"></span>
         </button>
-        <button type="button" class="dropdown-item" id="menuAboutBtn">
-          <span>About</span>
-        </button>
+        <button class="menu-item" id="menuAbout">About</button>
       </div>
     </div>
   </div>
 </header>
 
-<a href="/" class="brand-home" id="homeLink">
-  <img src="/logo.png" alt="" class="logo">
-  <h1>Prepare 4 3W</h1>
-</a>
-<p class="sub">So you can let surf the WWW</p>
-
-<div class="modal-bg" id="aboutModalBg">
+<div class="modal-bg" id="modalAbout">
   <div class="modal">
-    <h2>About Prepare 4 3W</h2>
-    <p class="about-text">A small toolbox that helps you prepare assets before publishing a website. Everything runs locally in your browser — nothing is ever uploaded.</p>
-    <p class="about-text">Currently included: a favicon generator. A header/main/footer builder is planned next.</p>
-    <p class="about-version">Version 0.1.0</p>
-    <button type="button" class="close" id="closeAboutModal">Close</button>
+    <h2>About</h2>
+    <p><strong>Prepare 4 3W</strong></p>
+    <p class="muted">Version <span id="aboutVersion">0.2.1</span></p>
+    <p>A small toolbox that helps you prepare assets before publishing a website. Everything runs locally in your browser — nothing is ever uploaded.</p>
+    <p class="muted small">Currently included: a favicon generator. A header/main/footer builder is planned next.</p>
+    <button class="close" data-close="">Close</button>
   </div>
 </div>
 
@@ -141,7 +141,7 @@
   <div id="resultList"></div>
 </section>
 
-<footer>Prepare 4 3W · v0.1.0</footer>
+<footer>Prepare 4 3W · v0.2.1</footer>
 
 <script src="app.js"></script>
 </body>
