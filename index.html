@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#131313">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="style.css">
+<title>Prepare 4 3W</title>
+</head>
+<body>
+
+<header>
+  <a href="/" class="brand" id="homeLink">
+    <img src="/logo.png" alt="Prepare 4 3W" class="logo">
+  </a>
+  <div class="header-icons">
+    <button class="icon" id="fullscreenToggle" title="Fullscreen">⛶</button>
+    <button class="icon" id="themeToggle" title="Toggle theme">◐</button>
+    <div class="menu-wrap">
+      <button class="icon" id="menuToggle" title="Menu">☰</button>
+      <div class="dropdown" id="dropdown">
+        <a href="https://michels.world">michels.world</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<h1>Prepare 4 3W</h1>
+<p class="sub">So you can let surf the WWW</p>
+
+<!-- Home: tool picker -->
+<section id="homeView">
+  <div class="tool-grid">
+    <button type="button" class="tool-card" id="openFavicon">
+      <span class="tool-icon">🖼️</span>
+      <span class="tool-name">Favicons</span>
+      <span class="tool-desc">Crop an image and export a full favicon set.</span>
+    </button>
+    <div class="tool-card disabled">
+      <span class="badge">Coming soon</span>
+      <span class="tool-icon">🧱</span>
+      <span class="tool-name">Baukasten</span>
+      <span class="tool-desc">Build header, main &amp; footer blocks with a live preview.</span>
+    </div>
+  </div>
+</section>
+
+<!-- Favicon tool -->
+<section id="faviconView" hidden>
+  <button type="button" class="back" id="backBtn">← Back</button>
+
+  <div class="drop" id="drop">
+    <p><strong>Tap to choose an image</strong><br>or drag and drop it here</p>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <div id="cropCard" class="card" hidden>
+    <div class="crop-stage" id="cropStage">
+      <img id="sourceImg" alt="">
+      <div class="crop-box" id="cropBox">
+        <div class="handle handle-nw" data-h="nw"></div>
+        <div class="handle handle-ne" data-h="ne"></div>
+        <div class="handle handle-sw" data-h="sw"></div>
+        <div class="handle handle-se" data-h="se"></div>
+      </div>
+    </div>
+    <p class="crop-hint" id="cropHint"></p>
+  </div>
+
+  <div id="optionsCard" class="card" hidden>
+    <p class="label-main">Which files do you need?</p>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-ico" checked>
+      <span><strong>favicon.ico</strong><br><span class="opt-desc">Multi-size (16/32/48px) — the classic browser tab icon.</span></span>
+    </label>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-16" checked>
+      <span><strong>favicon-16x16.png</strong><br><span class="opt-desc">Small PNG fallback for browser tabs.</span></span>
+    </label>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-32" checked>
+      <span><strong>favicon-32x32.png</strong><br><span class="opt-desc">Larger PNG fallback, used by some browsers and OSes.</span></span>
+    </label>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-apple" checked>
+      <span><strong>apple-touch-icon.png</strong><br><span class="opt-desc">180×180 — iOS "Add to Home Screen" icon.</span></span>
+    </label>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-192">
+      <span><strong>android-chrome-192x192.png</strong><br><span class="opt-desc">Android home screen / PWA icon.</span></span>
+    </label>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-512">
+      <span><strong>android-chrome-512x512.png</strong><br><span class="opt-desc">Larger Android/PWA icon, also used for splash screens.</span></span>
+    </label>
+
+    <label class="opt-row">
+      <input type="checkbox" id="opt-manifest">
+      <span><strong>site.webmanifest</strong><br><span class="opt-desc">Small JSON file that tells phones how to show the site as an app. Needs both Android icons above — they'll be included automatically.</span></span>
+    </label>
+  </div>
+
+  <button type="button" id="generateBtn" class="primary" hidden>Generate favicons</button>
+
+  <p class="size-warning" id="sizeWarning" hidden></p>
+
+  <div class="btn-row" id="resultButtons" hidden>
+    <button type="button" id="downloadAllBtn">Download all</button>
+    <button type="button" id="zipBtn">Download all as ZIP</button>
+  </div>
+  <div id="resultList"></div>
+</section>
+
+<footer>Prepare 4 3W · v0.1.0</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
