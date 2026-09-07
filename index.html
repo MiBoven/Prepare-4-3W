@@ -8,29 +8,45 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" href="/favicon.ico">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="stylesheet" href="style.css">
 <title>Prepare 4 3W</title>
 </head>
 <body>
 
 <header>
-  <a href="/" class="brand" id="homeLink">
-    <img src="/logo.png" alt="Prepare 4 3W" class="logo">
-  </a>
   <div class="header-icons">
     <button class="icon" id="fullscreenToggle" title="Fullscreen">⛶</button>
-    <button class="icon" id="themeToggle" title="Toggle theme">◐</button>
     <div class="menu-wrap">
       <button class="icon" id="menuToggle" title="Menu">☰</button>
       <div class="dropdown" id="dropdown">
-        <a href="https://michels.world">michels.world</a>
+        <button type="button" class="dropdown-item" id="menuThemeToggle">
+          <span>Dark mode</span>
+          <span class="switch" id="themeSwitch"></span>
+        </button>
+        <button type="button" class="dropdown-item" id="menuAboutBtn">
+          <span>About</span>
+        </button>
       </div>
     </div>
   </div>
 </header>
 
-<h1>Prepare 4 3W</h1>
+<a href="/" class="brand-home" id="homeLink">
+  <img src="/logo.png" alt="" class="logo">
+  <h1>Prepare 4 3W</h1>
+</a>
 <p class="sub">So you can let surf the WWW</p>
+
+<div class="modal-bg" id="aboutModalBg">
+  <div class="modal">
+    <h2>About Prepare 4 3W</h2>
+    <p class="about-text">A small toolbox that helps you prepare assets before publishing a website. Everything runs locally in your browser — nothing is ever uploaded.</p>
+    <p class="about-text">Currently included: a favicon generator. A header/main/footer builder is planned next.</p>
+    <p class="about-version">Version 0.1.0</p>
+    <button type="button" class="close" id="closeAboutModal">Close</button>
+  </div>
+</div>
 
 <!-- Home: tool picker -->
 <section id="homeView">
@@ -54,7 +70,7 @@
   <button type="button" class="back" id="backBtn">← Back</button>
 
   <div class="drop" id="drop">
-    <p><strong>Tap to choose an image</strong><br>or drag and drop it here</p>
+    <p><strong>Tap to choose an image</strong><br>or drag and drop it here<br>or paste it from your clipboard (Ctrl+V / Cmd+V)</p>
     <input type="file" id="fileInput" accept="image/*">
   </div>
 
@@ -67,6 +83,10 @@
         <div class="handle handle-sw" data-h="sw"></div>
         <div class="handle handle-se" data-h="se"></div>
       </div>
+    </div>
+    <div class="crop-actions">
+      <button type="button" id="centerCropBtn">Center</button>
+      <button type="button" id="maximizeCropBtn">Maximize</button>
     </div>
     <p class="crop-hint" id="cropHint"></p>
   </div>

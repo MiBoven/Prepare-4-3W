@@ -4,13 +4,14 @@
 
 A tiny, privacy-friendly toolbox for getting a website ready to ship — starting with a favicon generator. Everything runs entirely in your browser, nothing is ever uploaded to a server.
 
-**Live at:** [prepare43w.michels.world](https://prepare43w.michels.world) 
+**Live at:** [prepare43w.michels.world](https://prepare43w.michels.world)
 
 ## Features
 
 ### Favicons
-- Upload or drag & drop a single image (any browser-supported format: PNG, WEBP, JPG, GIF, ...)
-- A square crop selection sits on top of the full image — drag it to move, drag any corner handle to resize. The selection always stays square
+- Upload, drag & drop, or **paste from the clipboard** (Ctrl+V / Cmd+V) a single image (any browser-supported format: PNG, WEBP, JPG, GIF, ...)
+- A square crop selection sits on top of the full image — drag it to move, drag any corner handle to resize. The selection always stays square and can never be dragged or resized outside the image
+- **Center** snaps the selection back to the middle at its current size; **Maximize** grows it to the largest square that fits the image
 - Recommended minimum crop size is **512×512px**; if your selection is smaller, the larger icons are upscaled and a warning is shown next to the download buttons
 - Choose which files to generate — your last selection is remembered (`localStorage`) for next time:
 
@@ -33,6 +34,10 @@ A tiny, privacy-friendly toolbox for getting a website ready to ship — startin
 ### Baukasten *(coming soon)*
 A header/main/footer builder with a live preview, for putting together page sections as building blocks. Not implemented yet — shown as a disabled placeholder on the home screen for now.
 
+### Navigation & menu
+- The logo sits next to the page title; clicking either takes you back to the home screen
+- The menu (☰, top right) currently holds two things: a **Dark mode** toggle and **About** (a short info modal with the app description and version)
+
 ## How it works
 
 The crop tool displays the full image and overlays a square selection box positioned in on-screen pixels. When you hit "Generate favicons", the on-screen crop rectangle is converted back into the original image's pixel coordinates (using the ratio between displayed size and natural size), then drawn onto a `<canvas>` at each required output size via `drawImage()` — which is what handles both downscaling and, if needed, upscaling.
@@ -48,21 +53,27 @@ Each PNG is produced with `canvas.toBlob('image/png')`. For `favicon.ico`, the r
 
 ## Favicon
 
-`index.html` already references these files at the repo root for Prepare 4 3W's *own* favicon (add them yourself — they aren't included, and yes, this is a little on-the-nose for a favicon-generator app):
+Prepare 4 3W's own favicon set — fittingly, generated with the app itself — is included at the repo root:
 
-- `favicon.ico`
-- `favicon-16x16.png`
-- `favicon-32x32.png`
-- `apple-touch-icon.png` (180×180, used for "Add to Home Screen" on iOS)
-- `logo.png` (used in the header)
+- `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`
+- `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest` (linked from `index.html`'s `<head>`)
+- `logo.png` (shown next to the page title)
 
-If any file is missing, browsers just silently skip it — nothing breaks, you'll just see a generic icon until they're added.
+If any file were ever missing, browsers just silently skip it — nothing breaks, you'd just see a generic icon.
 
 ## Browser support
 
 Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer Events API for the crop tool's drag/resize handles (mouse, touch, and pen all work) and `canvas.toBlob()` for image export, both widely supported.
 
 ## Changelog
+
+### 0.2.0 — 2026-09-08
+- Own favicon set (all files, including `site.webmanifest`) added to the repo root, generated with the app itself
+- Images can now also be pasted from the clipboard (Ctrl+V / Cmd+V), in addition to upload and drag & drop
+- Added **Center** and **Maximize** buttons to the crop tool
+- Fixed the crop selection being able to be dragged/resized past the edge of the image in some corner-handle cases
+- Logo now sits next to the page title instead of in the header; clicking either goes home
+- Reworked the menu: dark mode toggle moved out of the header and into the menu; added an **About** entry; removed the michels.world link
 
 ### 0.1.0 — 2026-09-08 — Initial release
 - Home screen with a tool grid; Favicons is live, Baukasten shown as a "coming soon" placeholder

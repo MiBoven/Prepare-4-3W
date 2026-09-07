@@ -1,15 +1,15 @@
 // ======================================================================
-// Theme
+// Theme (toggled from the menu)
 // ======================================================================
 const root = document.documentElement;
-const themeToggle = document.getElementById('themeToggle');
+const themeSwitch = document.getElementById('themeSwitch');
 function setTheme(t) {
   root.setAttribute('data-theme', t);
   localStorage.setItem('prepare4w-theme', t);
-  themeToggle.textContent = t === 'dark' ? '◐' : '◑';
+  themeSwitch.classList.toggle('on', t === 'dark');
 }
 setTheme(localStorage.getItem('prepare4w-theme') || 'dark');
-themeToggle.addEventListener('click', () => {
+document.getElementById('menuThemeToggle').addEventListener('click', () => {
   setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 });
 
@@ -34,6 +34,19 @@ menuToggle.addEventListener('click', (e) => {
   dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
 });
 document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+
+// ---------- About modal ----------
+const aboutModalBg = document.getElementById('aboutModalBg');
+document.getElementById('menuAboutBtn').addEventListener('click', () => {
+  dropdown.style.display = 'none';
+  aboutModalBg.classList.add('open');
+});
+document.getElementById('closeAboutModal').addEventListener('click', () => {
+  aboutModalBg.classList.remove('open');
+});
+aboutModalBg.addEventListener('click', (e) => {
+  if (e.target === aboutModalBg) aboutModalBg.classList.remove('open');
+});
 
 // ======================================================================
 // View routing (home <-> favicon tool)
@@ -131,6 +144,20 @@ fileInput.addEventListener('change', e => {
   fileInput.value = '';
 });
 
+document.addEventListener('paste', (e) => {
+  if (faviconView.hidden) return;
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) loadImageFile(file);
+      e.preventDefault();
+      break;
+    }
+  }
+});
+
 function loadImageFile(file) {
   if (!file.type.startsWith('image/')) {
     alert('Please choose an image file.');
@@ -220,25 +247,46 @@ window.addEventListener('pointermove', (e) => {
     return;
   }
 
-  // Resize: keep the opposite corner anchored, keep the box square.
+  // Resize: the corner opposite the dragged handle stays fixed in place,
+  // and the maximum size is capped by that fixed anchor point plus the
+  // stage edges, so the box can never be dragged out of the image.
   let newSize;
   if (dragMode === 'se') newSize = boxStart.size + Math.max(dx, dy);
   else if (dragMode === 'nw') newSize = boxStart.size - Math.min(dx, dy);
   else if (dragMode === 'ne') newSize = boxStart.size + Math.max(dx, -dy);
   else if (dragMode === 'sw') newSize = boxStart.size + Math.max(-dx, dy);
 
-  newSize = Math.max(MIN_BOX, newSize);
-
-  let left = boxStart.left;
-  let top = boxStart.top;
-  if (dragMode === 'nw') { left = boxStart.left + boxStart.size - newSize; top = boxStart.top + boxStart.size - newSize; }
-  else if (dragMode === 'ne') { top = boxStart.top + boxStart.size - newSize; }
-  else if (dragMode === 'sw') { left = boxStart.left + boxStart.size - newSize; }
-
-  // Clamp so the box never leaves the visible image
-  newSize = Math.min(newSize, stageW - Math.max(0, left), stageH - Math.max(0, top));
-  left = Math.max(0, Math.min(left, stageW - newSize));
-  top = Math.max(0, Math.min(top, stageH - newSize));
+  let maxSize;
+  let left, top;
+  if (dragMode === 'nw') {
+    const anchorX = boxStart.left + boxStart.size;
+    const anchorY = boxStart.top + boxStart.size;
+    maxSize = Math.min(anchorX, anchorY);
+    newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
+    left = anchorX - newSize;
+    top = anchorY - newSize;
+  } else if (dragMode === 'ne') {
+    const anchorX = boxStart.left;
+    const anchorY = boxStart.top + boxStart.size;
+    maxSize = Math.min(stageW - anchorX, anchorY);
+    newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
+    left = anchorX;
+    top = anchorY - newSize;
+  } else if (dragMode === 'sw') {
+    const anchorX = boxStart.left + boxStart.size;
+    const anchorY = boxStart.top;
+    maxSize = Math.min(anchorX, stageH - anchorY);
+    newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
+    left = anchorX - newSize;
+    top = anchorY;
+  } else { // se
+    const anchorX = boxStart.left;
+    const anchorY = boxStart.top;
+    maxSize = Math.min(stageW - anchorX, stageH - anchorY);
+    newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
+    left = anchorX;
+    top = anchorY;
+  }
 
   setCropBox(left, top, newSize);
 });
@@ -246,6 +294,18 @@ window.addEventListener('pointerup', () => { dragMode = null; });
 
 window.addEventListener('resize', () => {
   if (!cropCard.hidden) initCropBox();
+});
+
+// ---------- Center / Maximize actions ----------
+document.getElementById('centerCropBtn').addEventListener('click', () => {
+  const { w: stageW, h: stageH } = stageBounds();
+  const size = Math.min(cropBox.offsetWidth, stageW, stageH);
+  setCropBox(Math.round((stageW - size) / 2), Math.round((stageH - size) / 2), size);
+});
+document.getElementById('maximizeCropBtn').addEventListener('click', () => {
+  const { w: stageW, h: stageH } = stageBounds();
+  const size = Math.min(stageW, stageH);
+  setCropBox(Math.round((stageW - size) / 2), Math.round((stageH - size) / 2), size);
 });
 
 // ======================================================================
