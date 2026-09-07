@@ -4,7 +4,7 @@
 
 A tiny, privacy-friendly toolbox for getting a website ready to ship — starting with a favicon generator. Everything runs entirely in your browser, nothing is ever uploaded to a server.
 
-**Live at:** [prepare4w.michels.world](https://prepare4w.michels.world) *(adjust to the actual subdomain once set up)*
+**Live at:** [prepare43w.michels.world](https://prepare43w.michels.world) 
 
 ## Features
 
