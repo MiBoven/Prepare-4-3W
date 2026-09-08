@@ -51,9 +51,9 @@
   <div class="modal">
     <h2>About</h2>
     <p><strong>Prepare 4 3W</strong></p>
-    <p class="muted">Version <span id="aboutVersion">0.9.0</span></p>
+    <p class="muted">Version <span id="aboutVersion">1.1.0</span></p>
     <p>A small toolbox that helps you prepare assets before publishing a website. Everything runs locally in your browser — nothing is ever uploaded.</p>
-    <p class="muted small">Currently included: a favicon generator. A header/main/footer builder is planned next.</p>
+    <p class="muted small">Currently included: a favicon generator and a header/main/footer Baukasten.</p>
     <button class="close" data-close="">Close</button>
   </div>
 </div>
@@ -66,12 +66,11 @@
       <span class="tool-name">Favicons</span>
       <span class="tool-desc">Crop an image and export a full favicon set.</span>
     </button>
-    <div class="tool-card disabled">
-      <span class="badge">Coming soon</span>
+    <button type="button" class="tool-card" id="openBaukasten">
       <span class="tool-icon">🧱</span>
       <span class="tool-name">Baukasten</span>
       <span class="tool-desc">Build header, main &amp; footer blocks with a live preview.</span>
-    </div>
+    </button>
   </div>
 </section>
 
@@ -151,7 +150,52 @@
   <div id="resultList"></div>
 </section>
 
-<footer>Prepare 4 3W · v0.9.0</footer>
+<!-- Baukasten -->
+<section id="baukastenView" hidden>
+  <button type="button" class="back" id="backBtnBaukasten">← Back</button>
+
+  <div class="bk-tabs" id="bkTabs">
+    <button type="button" class="bk-tab active" data-section="header">Header</button>
+    <button type="button" class="bk-tab" data-section="main">Main</button>
+    <button type="button" class="bk-tab" data-section="footer">Footer</button>
+  </div>
+
+  <div class="card">
+    <p class="label-main">Add a block to this section</p>
+    <div class="bk-palette">
+      <button type="button" class="bk-add-btn" data-type="logo">+ Logo</button>
+      <button type="button" class="bk-add-btn" data-type="nav">+ Nav</button>
+      <button type="button" class="bk-add-btn" data-type="text">+ Text</button>
+      <button type="button" class="bk-add-btn" data-type="image">+ Image</button>
+      <button type="button" class="bk-add-btn" data-type="button">+ Button</button>
+    </div>
+  </div>
+
+  <div id="bkBlockList"></div>
+
+  <div class="card">
+    <p class="label-main">Live preview</p>
+    <iframe id="bkPreview" class="bk-preview" title="Preview"></iframe>
+  </div>
+
+  <div class="card">
+    <div class="bk-code-head">
+      <p class="label-main">HTML</p>
+      <button type="button" class="bk-copy-btn" data-copy="html">Copy</button>
+    </div>
+    <pre class="bk-code" id="bkHtmlOut"></pre>
+  </div>
+
+  <div class="card">
+    <div class="bk-code-head">
+      <p class="label-main">CSS</p>
+      <button type="button" class="bk-copy-btn" data-copy="css">Copy</button>
+    </div>
+    <pre class="bk-code" id="bkCssOut"></pre>
+  </div>
+</section>
+
+<footer>Prepare 4 3W · v1.1.0</footer>
 
 <script src="app.js"></script>
 </body>

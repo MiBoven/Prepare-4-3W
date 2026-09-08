@@ -65,18 +65,27 @@ modalAbout.addEventListener('click', (e) => {
 // ======================================================================
 const homeView = document.getElementById('homeView');
 const faviconView = document.getElementById('faviconView');
+const baukastenView = document.getElementById('baukastenView');
 const brandHome = document.getElementById('brandHome');
 
 function showHome() {
   faviconView.hidden = true;
+  baukastenView.hidden = true;
   homeView.hidden = false;
 }
 function showFavicon() {
   homeView.hidden = true;
   faviconView.hidden = false;
 }
+function showBaukasten() {
+  homeView.hidden = true;
+  baukastenView.hidden = false;
+  bkRenderAll();
+}
 document.getElementById('openFavicon').addEventListener('click', showFavicon);
 document.getElementById('backBtn').addEventListener('click', showHome);
+document.getElementById('openBaukasten').addEventListener('click', showBaukasten);
+document.getElementById('backBtnBaukasten').addEventListener('click', showHome);
 brandHome.addEventListener('click', showHome);
 brandHome.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showHome(); }
@@ -676,4 +685,364 @@ zipBtn.addEventListener('click', async () => {
     zipBtn.disabled = false;
     zipBtn.textContent = 'Download all as ZIP';
   }
+});
+
+// ======================================================================
+// Baukasten: freely combinable header/main/footer blocks
+// ======================================================================
+const bkTabs = document.getElementById('bkTabs');
+const bkBlockList = document.getElementById('bkBlockList');
+const bkPreview = document.getElementById('bkPreview');
+const bkHtmlOut = document.getElementById('bkHtmlOut');
+const bkCssOut = document.getElementById('bkCssOut');
+
+const bkState = {
+  activeSection: 'header',
+  idCounter: 0,
+  sections: { header: [], main: [], footer: [] }
+};
+
+const BK_TYPE_LABELS = { logo: 'Logo', nav: 'Nav', text: 'Text', image: 'Image', button: 'Button' };
+
+// Deliberately colorless: only structure/spacing, so the snippet drops into
+// any existing site's palette without fighting it. `currentColor` on the
+// button border means it inherits whatever text color the target page uses.
+const BK_CSS = `header, footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.b4w-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.b4w-logo img {
+  height: 40px;
+  width: auto;
+}
+
+.b4w-logo span {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.b4w-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.b4w-nav a {
+  text-decoration: none;
+}
+
+.b4w-text {
+  margin: 0;
+}
+
+.b4w-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.b4w-button {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  text-decoration: none;
+}
+`;
+
+function escHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escAttr(str) {
+  return escHtml(str).replace(/"/g, '&quot;');
+}
+
+function bkDefaultData(type) {
+  switch (type) {
+    case 'logo': return { imageSrc: 'logo.png', alt: 'Logo', text: 'Site Name' };
+    case 'nav': return { links: [{ label: 'Home', href: '#' }, { label: 'About', href: '#' }] };
+    case 'text': return { tag: 'h1', content: 'Heading text' };
+    case 'image': return { src: 'image.jpg', alt: 'Description' };
+    case 'button': return { label: 'Click me', href: '#' };
+    default: return {};
+  }
+}
+
+function bkBlockHTML(block) {
+  const d = block.data;
+  switch (block.type) {
+    case 'logo': {
+      const img = `<img src="${escAttr(d.imageSrc)}" alt="${escAttr(d.alt)}">`;
+      const label = d.text ? `<span>${escHtml(d.text)}</span>` : '';
+      return `<div class="b4w-logo">${img}${label}</div>`;
+    }
+    case 'nav': {
+      const links = d.links.map(l => `<a href="${escAttr(l.href)}">${escHtml(l.label)}</a>`).join('\n    ');
+      return `<nav class="b4w-nav">\n    ${links}\n  </nav>`;
+    }
+    case 'text':
+      return `<${d.tag} class="b4w-text">${escHtml(d.content)}</${d.tag}>`;
+    case 'image':
+      return `<img class="b4w-image" src="${escAttr(d.src)}" alt="${escAttr(d.alt)}">`;
+    case 'button':
+      return `<a class="b4w-button" href="${escAttr(d.href)}">${escHtml(d.label)}</a>`;
+    default:
+      return '';
+  }
+}
+
+function bkSectionHTML(tag, blocks) {
+  if (blocks.length === 0) return '';
+  const inner = blocks.map(b => '  ' + bkBlockHTML(b)).join('\n');
+  return `<${tag}>\n${inner}\n</${tag}>`;
+}
+
+function bkGenerateHTML() {
+  return [
+    bkSectionHTML('header', bkState.sections.header),
+    bkSectionHTML('main', bkState.sections.main),
+    bkSectionHTML('footer', bkState.sections.footer)
+  ].filter(Boolean).join('\n\n');
+}
+
+function bkUpdatePreview() {
+  const html = bkGenerateHTML();
+  const body = html || '<p style="padding:16px;color:#888;font-family:sans-serif;">Add some blocks to see a preview.</p>';
+  const doc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:#1a1a1a; background:#fff; }
+${BK_CSS}
+</style></head><body>${body}</body></html>`;
+  bkPreview.srcdoc = doc;
+}
+
+function bkRefreshOutputs() {
+  const html = bkGenerateHTML();
+  bkHtmlOut.textContent = html || '<!-- Add some blocks above to generate HTML -->';
+  bkCssOut.textContent = BK_CSS.trim();
+  bkUpdatePreview();
+}
+
+// ---------- Field builders (plain DOM, not innerHTML — so typing never
+// fights a re-render and values never need attribute-escaping) ----------
+function bkField(labelText, inputEl) {
+  const wrap = document.createElement('div');
+  wrap.className = 'bk-field';
+  const label = document.createElement('label');
+  label.textContent = labelText;
+  wrap.appendChild(label);
+  wrap.appendChild(inputEl);
+  return wrap;
+}
+function bkTextInput(value, onInput) {
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = value;
+  input.addEventListener('input', () => onInput(input.value));
+  return input;
+}
+function bkTextarea(value, onInput) {
+  const ta = document.createElement('textarea');
+  ta.value = value;
+  ta.addEventListener('input', () => onInput(ta.value));
+  return ta;
+}
+function bkSelect(options, value, onChange) {
+  const sel = document.createElement('select');
+  options.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    if (opt.value === value) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => onChange(sel.value));
+  return sel;
+}
+
+function bkBuildFields(block, fieldsWrap) {
+  const d = block.data;
+  if (block.type === 'logo') {
+    fieldsWrap.appendChild(bkField('Image path', bkTextInput(d.imageSrc, v => { d.imageSrc = v; bkRefreshOutputs(); })));
+    fieldsWrap.appendChild(bkField('Alt text', bkTextInput(d.alt, v => { d.alt = v; bkRefreshOutputs(); })));
+    fieldsWrap.appendChild(bkField('Brand text (optional)', bkTextInput(d.text, v => { d.text = v; bkRefreshOutputs(); })));
+  } else if (block.type === 'nav') {
+    const listWrap = document.createElement('div');
+    d.links.forEach((link, i) => {
+      const row = document.createElement('div');
+      row.className = 'bk-link-row';
+      const labelInput = bkTextInput(link.label, v => { link.label = v; bkRefreshOutputs(); });
+      labelInput.placeholder = 'Label';
+      const hrefInput = bkTextInput(link.href, v => { link.href = v; bkRefreshOutputs(); });
+      hrefInput.placeholder = 'Link (href)';
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'bk-icon-sm';
+      removeBtn.textContent = '×';
+      removeBtn.title = 'Remove link';
+      removeBtn.addEventListener('click', () => {
+        d.links.splice(i, 1);
+        bkRenderBlockList();
+        bkRefreshOutputs();
+      });
+      row.appendChild(labelInput);
+      row.appendChild(hrefInput);
+      row.appendChild(removeBtn);
+      listWrap.appendChild(row);
+    });
+    fieldsWrap.appendChild(listWrap);
+    const addLinkBtn = document.createElement('button');
+    addLinkBtn.type = 'button';
+    addLinkBtn.className = 'bk-add-link';
+    addLinkBtn.textContent = '+ Add link';
+    addLinkBtn.addEventListener('click', () => {
+      d.links.push({ label: 'New link', href: '#' });
+      bkRenderBlockList();
+      bkRefreshOutputs();
+    });
+    fieldsWrap.appendChild(addLinkBtn);
+  } else if (block.type === 'text') {
+    fieldsWrap.appendChild(bkField('Style', bkSelect([
+      { value: 'h1', label: 'Heading (h1)' },
+      { value: 'h2', label: 'Heading (h2)' },
+      { value: 'h3', label: 'Heading (h3)' },
+      { value: 'p', label: 'Paragraph' }
+    ], d.tag, v => { d.tag = v; bkRefreshOutputs(); })));
+    fieldsWrap.appendChild(bkField('Content', bkTextarea(d.content, v => { d.content = v; bkRefreshOutputs(); })));
+  } else if (block.type === 'image') {
+    fieldsWrap.appendChild(bkField('Image path', bkTextInput(d.src, v => { d.src = v; bkRefreshOutputs(); })));
+    fieldsWrap.appendChild(bkField('Alt text', bkTextInput(d.alt, v => { d.alt = v; bkRefreshOutputs(); })));
+  } else if (block.type === 'button') {
+    fieldsWrap.appendChild(bkField('Label', bkTextInput(d.label, v => { d.label = v; bkRefreshOutputs(); })));
+    fieldsWrap.appendChild(bkField('Link (href)', bkTextInput(d.href, v => { d.href = v; bkRefreshOutputs(); })));
+  }
+}
+
+function bkCreateBlockCard(block, index, total) {
+  const card = document.createElement('div');
+  card.className = 'bk-block';
+
+  const head = document.createElement('div');
+  head.className = 'bk-block-head';
+  const typeLabel = document.createElement('span');
+  typeLabel.className = 'bk-block-type';
+  typeLabel.textContent = BK_TYPE_LABELS[block.type] || block.type;
+
+  const actions = document.createElement('div');
+  actions.className = 'bk-block-actions';
+
+  const upBtn = document.createElement('button');
+  upBtn.type = 'button'; upBtn.className = 'bk-icon-sm'; upBtn.textContent = '↑'; upBtn.title = 'Move up';
+  upBtn.disabled = index === 0;
+  upBtn.addEventListener('click', () => bkMoveBlock(block.id, -1));
+
+  const downBtn = document.createElement('button');
+  downBtn.type = 'button'; downBtn.className = 'bk-icon-sm'; downBtn.textContent = '↓'; downBtn.title = 'Move down';
+  downBtn.disabled = index === total - 1;
+  downBtn.addEventListener('click', () => bkMoveBlock(block.id, 1));
+
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button'; removeBtn.className = 'bk-icon-sm'; removeBtn.textContent = '×'; removeBtn.title = 'Remove block';
+  removeBtn.addEventListener('click', () => bkRemoveBlock(block.id));
+
+  actions.appendChild(upBtn);
+  actions.appendChild(downBtn);
+  actions.appendChild(removeBtn);
+  head.appendChild(typeLabel);
+  head.appendChild(actions);
+
+  const fields = document.createElement('div');
+  bkBuildFields(block, fields);
+
+  card.appendChild(head);
+  card.appendChild(fields);
+  return card;
+}
+
+function bkRenderBlockList() {
+  const blocks = bkState.sections[bkState.activeSection];
+  bkBlockList.innerHTML = '';
+  if (blocks.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'bk-empty';
+    empty.textContent = 'No blocks in this section yet — add one above.';
+    bkBlockList.appendChild(empty);
+    return;
+  }
+  blocks.forEach((block, i) => {
+    bkBlockList.appendChild(bkCreateBlockCard(block, i, blocks.length));
+  });
+}
+
+function bkMoveBlock(id, dir) {
+  const blocks = bkState.sections[bkState.activeSection];
+  const i = blocks.findIndex(b => b.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= blocks.length) return;
+  [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+  bkRenderBlockList();
+  bkRefreshOutputs();
+}
+
+function bkRemoveBlock(id) {
+  bkState.sections[bkState.activeSection] = bkState.sections[bkState.activeSection].filter(b => b.id !== id);
+  bkRenderBlockList();
+  bkRefreshOutputs();
+}
+
+function bkAddBlock(type) {
+  bkState.idCounter += 1;
+  bkState.sections[bkState.activeSection].push({ id: bkState.idCounter, type, data: bkDefaultData(type) });
+  bkRenderBlockList();
+  bkRefreshOutputs();
+}
+
+function bkRenderAll() {
+  bkRenderBlockList();
+  bkRefreshOutputs();
+}
+
+bkTabs.querySelectorAll('.bk-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    bkTabs.querySelectorAll('.bk-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    bkState.activeSection = tab.dataset.section;
+    bkRenderBlockList();
+  });
+});
+
+document.querySelectorAll('.bk-add-btn').forEach(btn => {
+  btn.addEventListener('click', () => bkAddBlock(btn.dataset.type));
+});
+
+document.querySelectorAll('.bk-copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const targetId = btn.dataset.copy === 'html' ? 'bkHtmlOut' : 'bkCssOut';
+    const text = document.getElementById(targetId).textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+    } catch (err) {
+      alert('Could not copy automatically — please select and copy the text manually.');
+    }
+  });
 });
