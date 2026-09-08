@@ -65,27 +65,27 @@ modalAbout.addEventListener('click', (e) => {
 // ======================================================================
 const homeView = document.getElementById('homeView');
 const faviconView = document.getElementById('faviconView');
-const baukastenView = document.getElementById('baukastenView');
+const webCardHouseView = document.getElementById('webCardHouseView');
 const brandHome = document.getElementById('brandHome');
 
 function showHome() {
   faviconView.hidden = true;
-  baukastenView.hidden = true;
+  webCardHouseView.hidden = true;
   homeView.hidden = false;
 }
 function showFavicon() {
   homeView.hidden = true;
   faviconView.hidden = false;
 }
-function showBaukasten() {
+function showWebCardHouse() {
   homeView.hidden = true;
-  baukastenView.hidden = false;
+  webCardHouseView.hidden = false;
   bkRenderAll();
 }
 document.getElementById('openFavicon').addEventListener('click', showFavicon);
 document.getElementById('backBtn').addEventListener('click', showHome);
-document.getElementById('openBaukasten').addEventListener('click', showBaukasten);
-document.getElementById('backBtnBaukasten').addEventListener('click', showHome);
+document.getElementById('openWebCardHouse').addEventListener('click', showWebCardHouse);
+document.getElementById('backBtnWebCardHouse').addEventListener('click', showHome);
 brandHome.addEventListener('click', showHome);
 brandHome.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showHome(); }
@@ -688,7 +688,7 @@ zipBtn.addEventListener('click', async () => {
 });
 
 // ======================================================================
-// Baukasten: freely combinable header/main/footer blocks
+// Web Card House (beta): freely combinable header/main/footer blocks
 // ======================================================================
 const bkTabs = document.getElementById('bkTabs');
 const bkBlockList = document.getElementById('bkBlockList');

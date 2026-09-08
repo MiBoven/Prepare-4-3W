@@ -51,9 +51,9 @@
   <div class="modal">
     <h2>About</h2>
     <p><strong>Prepare 4 3W</strong></p>
-    <p class="muted">Version <span id="aboutVersion">1.1.0</span></p>
+    <p class="muted">Version <span id="aboutVersion">1.1.1</span></p>
     <p>A small toolbox that helps you prepare assets before publishing a website. Everything runs locally in your browser — nothing is ever uploaded.</p>
-    <p class="muted small">Currently included: a favicon generator and a header/main/footer Baukasten.</p>
+    <p class="muted small">Currently included: a favicon generator and Web Card House, a header/main/footer builder (beta).</p>
     <button class="close" data-close="">Close</button>
   </div>
 </div>
@@ -66,9 +66,10 @@
       <span class="tool-name">Favicons</span>
       <span class="tool-desc">Crop an image and export a full favicon set.</span>
     </button>
-    <button type="button" class="tool-card" id="openBaukasten">
+    <button type="button" class="tool-card" id="openWebCardHouse">
+      <span class="badge">Beta</span>
       <span class="tool-icon">🧱</span>
-      <span class="tool-name">Baukasten</span>
+      <span class="tool-name">Web Card House</span>
       <span class="tool-desc">Build header, main &amp; footer blocks with a live preview.</span>
     </button>
   </div>
@@ -150,9 +151,9 @@
   <div id="resultList"></div>
 </section>
 
-<!-- Baukasten -->
-<section id="baukastenView" hidden>
-  <button type="button" class="back" id="backBtnBaukasten">← Back</button>
+<!-- Web Card House -->
+<section id="webCardHouseView" hidden>
+  <button type="button" class="back" id="backBtnWebCardHouse">← Back</button>
 
   <div class="bk-tabs" id="bkTabs">
     <button type="button" class="bk-tab active" data-section="header">Header</button>
@@ -195,7 +196,7 @@
   </div>
 </section>
 
-<footer>Prepare 4 3W · v1.1.0</footer>
+<footer>Prepare 4 3W · v1.1.1</footer>
 
 <script src="app.js"></script>
 </body>

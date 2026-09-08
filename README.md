@@ -32,7 +32,7 @@ A tiny, privacy-friendly toolbox for getting a website ready to ship — startin
 - The ZIP is built with a small vendor-free ZIP writer (uncompressed "store" method) — no external library needed for a handful of small icon files
 - `site.webmanifest` ships with placeholder `name`/`short_name` values ("My App") — edit those for the site you're actually using it on
 
-### Baukasten
+### Web Card House (beta)
 Freely assemble a header, main, and footer section out of five block types — Logo, Nav, Text, Image, Button — each with its own editable fields (image paths, link labels/URLs, heading level, text content, button labels). Per section you can:
 - Add any number of blocks in any order via the block palette
 - Reorder blocks with ↑/↓, or remove them
@@ -40,7 +40,7 @@ Freely assemble a header, main, and footer section out of five block types — L
 
 A live preview (rendered in a sandboxed `<iframe>`) updates as you type, and below it sit two read-only code panels — **HTML** and **CSS** — each with a **Copy** button. The generated CSS is deliberately colorless (only layout, spacing, and structure) so the snippet can be dropped into any existing site without fighting its color scheme; the one exception is the button style, which borders itself in `currentColor` so it's still visible against whatever text color the target page already uses.
 
-There's no download here — Baukasten is copy-paste only, since the output is meant to be pasted into an existing project rather than shipped as standalone files.
+There's no download here — Web Card House is copy-paste only, since the output is meant to be pasted into an existing project rather than shipped as standalone files.
 
 ### Navigation & menu
 - The logo sits next to the page title; clicking either takes you back to the home screen
@@ -60,9 +60,9 @@ Each PNG is produced with `canvas.toBlob('image/png')`. For `favicon.ico`, the r
 
 ## Files
 
-- `index.html` — markup for the home screen, the favicon tool, and the Baukasten
+- `index.html` — markup for the home screen, the favicon tool, and Web Card House
 - `style.css` — all styling
-- `app.js` — theme/menu/fullscreen behavior, the crop tool, icon/manifest generation, the ZIP writer, and the Baukasten
+- `app.js` — theme/menu/fullscreen behavior, the crop tool, icon/manifest generation, the ZIP writer, and Web Card House
 - `service-worker.js` — stale-while-revalidate caching for offline support
 - `favicon.ico` — kept at the repo root; some browsers and crawlers still request `/favicon.ico` directly regardless of `<link>` tags, so this one stays outside the `icons/` folder
 - `icons/` — the rest of Prepare 4 3W's own favicon set (`favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`); all referenced with absolute paths, so the folder can be renamed if needed
@@ -85,8 +85,11 @@ Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer E
 
 ## Changelog
 
+### 1.1.1 — 2026-09-08
+- Renamed "Baukasten" to **Web Card House** and marked it as beta (badge on the home screen card, noted in the About modal) — the current layout is a functional first pass and is due for a visual rework
+
 ### 1.1.0 — 2026-09-08
-- Added the Baukasten: freely combinable Logo/Nav/Text/Image/Button blocks for a header, main, and footer section, each with editable fields, reordering, and per-block removal
+- Added Web Card House (beta): freely combinable Logo/Nav/Text/Image/Button blocks for a header, main, and footer section, each with editable fields, reordering, and per-block removal
 - Live preview via a sandboxed iframe, plus copy-to-clipboard HTML and CSS output — colorless/generic styling meant to be pasted into any existing site
 
 ### 1.0.0 — 2026-09-08 — First stable release
