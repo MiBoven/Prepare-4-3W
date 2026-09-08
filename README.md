@@ -12,6 +12,7 @@ A tiny, privacy-friendly toolbox for getting a website ready to ship — startin
 - Upload, drag & drop, or **paste from the clipboard** (Ctrl+V / Cmd+V) a single image (any browser-supported format: PNG, WEBP, JPG, GIF, ...)
 - A square crop selection sits on top of the full image — drag it to move, drag any corner handle to resize. The selection always stays square and can never be dragged or resized outside the image
 - **Center** snaps the selection back to the middle at its current size; **Maximize** grows it to the largest square that fits the image
+- Corner handles have a generous 40×40px touch target for fingers, while the visible grip stays fully inside the selection — it can never render (or be dragged) outside the image, even at the very edge
 - Recommended minimum crop size is **512×512px**; if your selection is smaller, the larger icons are upscaled and a warning is shown next to the download buttons
 - Choose which files to generate — your last selection is remembered (`localStorage`) for next time:
 
@@ -37,6 +38,9 @@ A header/main/footer builder with a live preview, for putting together page sect
 ### Navigation & menu
 - The logo sits next to the page title; clicking either takes you back to the home screen
 - The menu (☰, top right) currently holds two things: a **Dark mode** toggle and **About** (a short info modal with the app description and version)
+
+### Link preview
+Open Graph and Twitter Card meta tags are set in `index.html`'s `<head>`, so sharing the link (chat apps, social media, etc.) shows a preview card with the logo, title, subtitle, and a short description — without the version number, which only appears in the in-app About modal.
 
 ### Offline support
 Once you've visited the site once (and especially once you've "installed" it via the browser's add-to-home-screen prompt, enabled by `site.webmanifest`), a service worker lets it keep working without a network connection. It uses a stale-while-revalidate strategy: every request is answered from the cache instantly if available, while a background fetch quietly refreshes that cache entry for next time — so you always get an immediate response, and you're never more than one online visit out of date.
@@ -73,6 +77,11 @@ If any file were ever missing, browsers just silently skip it — nothing breaks
 Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer Events API for the crop tool's drag/resize handles (mouse, touch, and pen all work) and `canvas.toBlob()` for image export, both widely supported.
 
 ## Changelog
+
+### 0.9.0 — 2026-09-08
+- Added Open Graph / Twitter Card meta tags for a proper link preview (logo, title, subtitle, description — no version number) when the URL is shared
+- Crop handles are now a full 40×40px touch target (up from 20×20px) for easier use on phones, and the visible grip is inset inside the crop box so it can no longer visually or functionally sit outside the image
+- Raised the minimum crop size slightly (40px → 90px) so the larger handles don't overlap each other on a very small selection
 
 ### 0.3.0 — 2026-09-08
 - Added offline support: a stale-while-revalidate service worker caches the app shell and its own icons, so the site keeps working without a network connection after the first visit

@@ -265,7 +265,7 @@ function updateCropHint(r) {
 let dragMode = null; // 'move' | 'nw' | 'ne' | 'sw' | 'se'
 let dragStartX = 0, dragStartY = 0;
 let boxStart = { left: 0, top: 0, size: 0 };
-const MIN_BOX = 40;
+const MIN_BOX = 90;
 
 function onPointerDown(mode) {
   return (e) => {

@@ -221,17 +221,27 @@ input[type=file] { display: none; }
 }
 .handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
+  touch-action: none;
+}
+.handle::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
   background: var(--accent);
   border: 2px solid var(--accent-text);
   border-radius: 50%;
-  touch-action: none;
 }
-.handle-nw { top: -10px; left: -10px; cursor: nwse-resize; }
-.handle-ne { top: -10px; right: -10px; cursor: nesw-resize; }
-.handle-sw { bottom: -10px; left: -10px; cursor: nesw-resize; }
-.handle-se { bottom: -10px; right: -10px; cursor: nwse-resize; }
+.handle-nw { top: 0; left: 0; cursor: nwse-resize; }
+.handle-nw::after { top: 4px; left: 4px; }
+.handle-ne { top: 0; right: 0; cursor: nesw-resize; }
+.handle-ne::after { top: 4px; right: 4px; }
+.handle-sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.handle-sw::after { bottom: 4px; left: 4px; }
+.handle-se { bottom: 0; right: 0; cursor: nwse-resize; }
+.handle-se::after { bottom: 4px; right: 4px; }
 .crop-hint {
   font-size: 12px; color: var(--text-secondary); margin: 10px 0 0; text-align: center;
 }
