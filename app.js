@@ -1,4 +1,16 @@
 // ======================================================================
+// Offline support (PWA)
+// ======================================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {
+      // Offline support just won't be available this session — the app
+      // still works fully online without it.
+    });
+  });
+}
+
+// ======================================================================
 // Theme (toggled from the menu)
 // ======================================================================
 const root = document.documentElement;
@@ -184,29 +196,66 @@ function loadImageFile(file) {
 }
 
 // ---------- Crop box: init, drag, resize ----------
+// The crop box is always bounded against the image's own rendered box
+// (getImgRect), not the wider stage — a portrait image can render
+// narrower than the stage, leaving empty space on the sides, and the
+// box must not be movable into that empty space.
+function getImgRect() {
+  return {
+    left: sourceImg.offsetLeft,
+    top: sourceImg.offsetTop,
+    width: sourceImg.clientWidth,
+    height: sourceImg.clientHeight
+  };
+}
+
+// Crop position/size as fractions of the image rect, so it can be
+// re-applied after the layout changes size (browser zoom, mobile address
+// bar show/hide on scroll, orientation change) instead of resetting.
+let cropRel = { left: 0.1, top: 0.1, size: 0.8 };
+
 function initCropBox() {
-  const stageW = cropStage.clientWidth;
-  const stageH = sourceImg.clientHeight;
-  const size = Math.round(Math.min(stageW, stageH) * 0.8);
-  const left = Math.round((stageW - size) / 2);
-  const top = Math.round((stageH - size) / 2);
+  const r = getImgRect();
+  const size = Math.round(Math.min(r.width, r.height) * 0.8);
+  const left = Math.round(r.left + (r.width - size) / 2);
+  const top = Math.round(r.top + (r.height - size) / 2);
   setCropBox(left, top, size);
 }
 
+function clampBoxToImage(left, top, size, r) {
+  size = Math.min(size, r.width, r.height);
+  left = Math.max(r.left, Math.min(left, r.left + r.width - size));
+  top = Math.max(r.top, Math.min(top, r.top + r.height - size));
+  return { left, top, size };
+}
+
 function setCropBox(left, top, size) {
-  cropBox.style.left = left + 'px';
-  cropBox.style.top = top + 'px';
-  cropBox.style.width = size + 'px';
-  cropBox.style.height = size + 'px';
-  updateCropHint();
+  const r = getImgRect();
+  const c = clampBoxToImage(left, top, size, r);
+  cropBox.style.left = c.left + 'px';
+  cropBox.style.top = c.top + 'px';
+  cropBox.style.width = c.size + 'px';
+  cropBox.style.height = c.size + 'px';
+  if (r.width > 0) {
+    cropRel = {
+      left: (c.left - r.left) / r.width,
+      top: (c.top - r.top) / r.width,
+      size: c.size / r.width
+    };
+  }
+  updateCropHint(r);
 }
 
-function stageBounds() {
-  return { w: cropStage.clientWidth, h: sourceImg.clientHeight };
+function reapplyCropFromRel() {
+  if (cropCard.hidden) return;
+  const r = getImgRect();
+  if (r.width === 0) return;
+  setCropBox(r.left + cropRel.left * r.width, r.top + cropRel.top * r.width, cropRel.size * r.width);
 }
 
-function updateCropHint() {
-  const scale = naturalWidth / cropStage.clientWidth;
+function updateCropHint(r) {
+  r = r || getImgRect();
+  const scale = naturalWidth / r.width;
   const naturalCropSize = Math.round(cropBox.offsetWidth * scale);
   cropHint.textContent = naturalCropSize < MIN_RECOMMENDED
     ? `Selected area ≈ ${naturalCropSize}×${naturalCropSize}px — smaller than the recommended ${MIN_RECOMMENDED}×${MIN_RECOMMENDED}px, larger icons will be upscaled.`
@@ -239,53 +288,52 @@ window.addEventListener('pointermove', (e) => {
   if (!dragMode) return;
   const dx = e.clientX - dragStartX;
   const dy = e.clientY - dragStartY;
-  const { w: stageW, h: stageH } = stageBounds();
+  const r = getImgRect();
 
   if (dragMode === 'move') {
     let left = boxStart.left + dx;
     let top = boxStart.top + dy;
-    left = Math.max(0, Math.min(left, stageW - boxStart.size));
-    top = Math.max(0, Math.min(top, stageH - boxStart.size));
+    left = Math.max(r.left, Math.min(left, r.left + r.width - boxStart.size));
+    top = Math.max(r.top, Math.min(top, r.top + r.height - boxStart.size));
     setCropBox(left, top, boxStart.size);
     return;
   }
 
   // Resize: the corner opposite the dragged handle stays fixed in place,
   // and the maximum size is capped by that fixed anchor point plus the
-  // stage edges, so the box can never be dragged out of the image.
+  // image's own edges, so the box can never be dragged out of the image.
   let newSize;
   if (dragMode === 'se') newSize = boxStart.size + Math.max(dx, dy);
   else if (dragMode === 'nw') newSize = boxStart.size - Math.min(dx, dy);
   else if (dragMode === 'ne') newSize = boxStart.size + Math.max(dx, -dy);
   else if (dragMode === 'sw') newSize = boxStart.size + Math.max(-dx, dy);
 
-  let maxSize;
-  let left, top;
+  let maxSize, left, top;
   if (dragMode === 'nw') {
     const anchorX = boxStart.left + boxStart.size;
     const anchorY = boxStart.top + boxStart.size;
-    maxSize = Math.min(anchorX, anchorY);
+    maxSize = Math.min(anchorX - r.left, anchorY - r.top);
     newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
     left = anchorX - newSize;
     top = anchorY - newSize;
   } else if (dragMode === 'ne') {
     const anchorX = boxStart.left;
     const anchorY = boxStart.top + boxStart.size;
-    maxSize = Math.min(stageW - anchorX, anchorY);
+    maxSize = Math.min((r.left + r.width) - anchorX, anchorY - r.top);
     newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
     left = anchorX;
     top = anchorY - newSize;
   } else if (dragMode === 'sw') {
     const anchorX = boxStart.left + boxStart.size;
     const anchorY = boxStart.top;
-    maxSize = Math.min(anchorX, stageH - anchorY);
+    maxSize = Math.min(anchorX - r.left, (r.top + r.height) - anchorY);
     newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
     left = anchorX - newSize;
     top = anchorY;
   } else { // se
     const anchorX = boxStart.left;
     const anchorY = boxStart.top;
-    maxSize = Math.min(stageW - anchorX, stageH - anchorY);
+    maxSize = Math.min((r.left + r.width) - anchorX, (r.top + r.height) - anchorY);
     newSize = Math.min(Math.max(MIN_BOX, newSize), maxSize);
     left = anchorX;
     top = anchorY;
@@ -295,29 +343,33 @@ window.addEventListener('pointermove', (e) => {
 });
 window.addEventListener('pointerup', () => { dragMode = null; });
 
-window.addEventListener('resize', () => {
-  if (!cropCard.hidden) initCropBox();
-});
+// Re-apply the crop proportionally instead of resetting it — this is what
+// used to make the box jump back to its default position on Ctrl+scroll
+// zoom (desktop) or on the mobile address bar hiding/showing while
+// scrolling, both of which fire a plain 'resize' event.
+window.addEventListener('resize', reapplyCropFromRel);
+window.addEventListener('orientationchange', reapplyCropFromRel);
 
 // ---------- Center / Maximize actions ----------
 document.getElementById('centerCropBtn').addEventListener('click', () => {
-  const { w: stageW, h: stageH } = stageBounds();
-  const size = Math.min(cropBox.offsetWidth, stageW, stageH);
-  setCropBox(Math.round((stageW - size) / 2), Math.round((stageH - size) / 2), size);
+  const r = getImgRect();
+  const size = Math.min(cropBox.offsetWidth, r.width, r.height);
+  setCropBox(r.left + (r.width - size) / 2, r.top + (r.height - size) / 2, size);
 });
 document.getElementById('maximizeCropBtn').addEventListener('click', () => {
-  const { w: stageW, h: stageH } = stageBounds();
-  const size = Math.min(stageW, stageH);
-  setCropBox(Math.round((stageW - size) / 2), Math.round((stageH - size) / 2), size);
+  const r = getImgRect();
+  const size = Math.min(r.width, r.height);
+  setCropBox(r.left + (r.width - size) / 2, r.top + (r.height - size) / 2, size);
 });
 
 // ======================================================================
 // Generating icons
 // ======================================================================
 function cropToCanvas(size) {
-  const scale = naturalWidth / cropStage.clientWidth;
-  const sx = cropBox.offsetLeft * scale;
-  const sy = cropBox.offsetTop * scale;
+  const r = getImgRect();
+  const scale = naturalWidth / r.width;
+  const sx = (cropBox.offsetLeft - r.left) * scale;
+  const sy = (cropBox.offsetTop - r.top) * scale;
   const sSize = cropBox.offsetWidth * scale;
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -396,7 +448,8 @@ async function generateAll() {
   generatedFiles = [];
   resultList.innerHTML = '';
 
-  const scale = naturalWidth / cropStage.clientWidth;
+  const r = getImgRect();
+  const scale = naturalWidth / r.width;
   const naturalCropSize = Math.round(cropBox.offsetWidth * scale);
   if (naturalCropSize < MIN_RECOMMENDED) {
     sizeWarning.hidden = false;
@@ -491,6 +544,7 @@ function formatSize(bytes) {
 }
 
 downloadAllBtn.addEventListener('click', () => {
+  if (generatedFiles.length === 0) return;
   generatedFiles.forEach((f, i) => {
     setTimeout(() => {
       const a = document.createElement('a');
@@ -608,6 +662,7 @@ async function buildZip(files) {
 }
 
 zipBtn.addEventListener('click', async () => {
+  if (generatedFiles.length === 0) return;
   zipBtn.disabled = true;
   zipBtn.textContent = 'Zipping…';
   try {

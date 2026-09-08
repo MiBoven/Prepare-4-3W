@@ -38,6 +38,9 @@ A header/main/footer builder with a live preview, for putting together page sect
 - The logo sits next to the page title; clicking either takes you back to the home screen
 - The menu (☰, top right) currently holds two things: a **Dark mode** toggle and **About** (a short info modal with the app description and version)
 
+### Offline support
+Once you've visited the site once (and especially once you've "installed" it via the browser's add-to-home-screen prompt, enabled by `site.webmanifest`), a service worker lets it keep working without a network connection. It uses a stale-while-revalidate strategy: every request is answered from the cache instantly if available, while a background fetch quietly refreshes that cache entry for next time — so you always get an immediate response, and you're never more than one online visit out of date.
+
 ## How it works
 
 The crop tool displays the full image and overlays a square selection box positioned in on-screen pixels. When you hit "Generate favicons", the on-screen crop rectangle is converted back into the original image's pixel coordinates (using the ratio between displayed size and natural size), then drawn onto a `<canvas>` at each required output size via `drawImage()` — which is what handles both downscaling and, if needed, upscaling.
@@ -49,15 +52,19 @@ Each PNG is produced with `canvas.toBlob('image/png')`. For `favicon.ico`, the r
 - `index.html` — markup for the home screen and the favicon tool
 - `style.css` — all styling
 - `app.js` — theme/menu/fullscreen behavior, the crop tool, icon/manifest generation, and the ZIP writer
-- Push all three to the repo root; `index.html` links to the other two with relative paths
+- `service-worker.js` — stale-while-revalidate caching for offline support
+- `favicon.ico` — kept at the repo root; some browsers and crawlers still request `/favicon.ico` directly regardless of `<link>` tags, so this one stays outside the `icons/` folder
+- `icons/` — the rest of Prepare 4 3W's own favicon set (`favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`); all referenced with absolute paths, so the folder can be renamed if needed
+- `logo.png` — kept at the repo root next to the other source files, since it's an in-app branding asset rather than a generated favicon
+- Push everything to the repo root, preserving the `icons/` folder structure
 
 ## Favicon
 
-Prepare 4 3W's own favicon set — fittingly, generated with the app itself — is included at the repo root:
+Prepare 4 3W's own favicon set — fittingly, generated with the app itself — is included:
 
-- `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`
-- `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest` (linked from `index.html`'s `<head>`)
-- `logo.png` (shown next to the page title)
+- `favicon.ico` at the repo root
+- `icons/favicon-16x16.png`, `icons/favicon-32x32.png`, `icons/apple-touch-icon.png`, `icons/android-chrome-192x192.png`, `icons/android-chrome-512x512.png`, `icons/site.webmanifest` (all linked from `index.html`'s `<head>`)
+- `logo.png` at the repo root (shown next to the page title)
 
 If any file were ever missing, browsers just silently skip it — nothing breaks, you'd just see a generic icon.
 
@@ -66,6 +73,16 @@ If any file were ever missing, browsers just silently skip it — nothing breaks
 Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer Events API for the crop tool's drag/resize handles (mouse, touch, and pen all work) and `canvas.toBlob()` for image export, both widely supported.
 
 ## Changelog
+
+### 0.3.0 — 2026-09-08
+- Added offline support: a stale-while-revalidate service worker caches the app shell and its own icons, so the site keeps working without a network connection after the first visit
+- `icons/site.webmanifest` now includes `start_url` and `scope`, which browsers require to consider a site installable as a PWA
+
+### 0.2.2 — 2026-09-08
+- Fixed the crop selection being able to sit in empty letterboxed space next to a portrait-oriented image instead of being bounded to the actual visible image
+- Fixed the crop selection resetting to its default position on Ctrl+scroll zoom (desktop) or on the mobile browser's address bar hiding while scrolling — both fire a plain `resize` event, which used to fully re-center the box; it's now re-applied proportionally instead
+- Fixed the download buttons being visible and clickable (producing an empty ZIP) before any image had been generated — caused by a CSS rule that unintentionally overrode the `hidden` attribute
+- Moved Prepare 4 3W's own generated favicon files into an `icons/` subfolder to keep the repo root tidy; `favicon.ico` stays at the root for maximum browser/crawler compatibility
 
 ### 0.2.1 — 2026-09-08
 - Fixed the header: logo, title, and subtitle now live together in one `.brand` block inside `<header>` (matching JPG75), instead of a separate block below the header
