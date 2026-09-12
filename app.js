@@ -406,8 +406,32 @@ function cropToCanvas(size) {
   return canvas;
 }
 
+// toDataURL is the older, more battle-tested API for guaranteeing a genuine
+// PNG encode — some mobile browsers/webviews have had inconsistent behavior
+// with toBlob's requested MIME type, occasionally ignoring it.
 function canvasToPngBlob(canvas) {
-  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  return dataUrlToBlob(canvas.toDataURL('image/png'));
+}
+
+function dataUrlToBlob(dataUrl) {
+  const commaIndex = dataUrl.indexOf(',');
+  const header = dataUrl.slice(0, commaIndex);
+  const base64 = dataUrl.slice(commaIndex + 1);
+  const mimeMatch = header.match(/data:([^;]+)/);
+  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+const PNG_SIGNATURE = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+function isPngBytes(bytes) {
+  if (bytes.length < 8) return false;
+  for (let i = 0; i < 8; i++) {
+    if (bytes[i] !== PNG_SIGNATURE[i]) return false;
+  }
+  return true;
 }
 
 function blobToUint8Array(blob) {
@@ -416,6 +440,11 @@ function blobToUint8Array(blob) {
 
 // Build a modern (PNG-in-ICO) favicon.ico from a list of {size, bytes}
 function buildIco(entries) {
+  entries.forEach(e => {
+    if (!isPngBytes(e.bytes)) {
+      throw new Error(`Icon data for size ${e.size} was not valid PNG — refusing to build a broken favicon.ico.`);
+    }
+  });
   const count = entries.length;
   const headerSize = 6 + 16 * count;
   let dataSize = 0;

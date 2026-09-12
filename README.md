@@ -86,6 +86,10 @@ Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer E
 
 ## Changelog
 
+### 1.2.1 — 2026-09-08
+- Switched PNG encoding from `canvas.toBlob()` to `canvas.toDataURL()`, the older and more universally consistent API, after a report of `favicon.ico` apparently containing WebP data instead of PNG on some device/browser
+- Added a PNG-signature check before packing images into `favicon.ico`: if a browser ever produces something other than a genuine PNG again, generation now fails with a clear message instead of silently shipping a broken or mislabeled file
+
 ### 1.2.0 — 2026-09-08
 - Added SVG support for the favicon generator. Since each output size is drawn fresh from the original source (never from a cached intermediate raster), an SVG source already produced crisp results at every size without any special-casing
 - Added a Photos/Files toggle above the upload area (matching JPG75's Bilder/Dateien toggle, in English): the default "Photos" mode uses the OS photo picker, which on mobile typically excludes SVGs; switching to "Files" opens the general file browser instead
