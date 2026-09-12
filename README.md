@@ -9,7 +9,8 @@ A tiny, privacy-friendly toolbox for getting a website ready to ship — startin
 ## Features
 
 ### Favicons
-- Upload, drag & drop, or **paste from the clipboard** (Ctrl+V / Cmd+V) a single image (any browser-supported format: PNG, WEBP, JPG, GIF, ...)
+- Upload, drag & drop, or **paste from the clipboard** (Ctrl+V / Cmd+V) a single image — any browser-supported raster format (PNG, WEBP, JPG, GIF, ...) or **SVG**. Since every output size is redrawn straight from the original source, an SVG source gets crisp, natively-rendered icons at every size instead of one upscaled/downscaled raster
+- A **Photos / Files** toggle sits above the upload area: "Photos" opens the OS photo picker (fast, but on mobile it typically won't list SVGs — they aren't photos); "Files" opens the general file browser, which shows every file type. Same pattern as JPG75's Bilder/Dateien toggle, just in English to match this app's UI. Drag & drop and clipboard paste aren't affected by this toggle — both already accept SVGs regardless
 - A square crop selection sits on top of the full image — drag it to move, drag any corner handle to resize. The selection always stays square and can never be dragged or resized outside the image
 - **Center** snaps the selection back to the middle at its current size; **Maximize** grows it to the largest square that fits the image
 - Corner handles have a generous 40×40px touch target for fingers, while the visible grip stays fully inside the selection — it can never render (or be dragged) outside the image, even at the very edge
@@ -84,6 +85,11 @@ If any file were ever missing, browsers just silently skip it — nothing breaks
 Works in all modern browsers (Chrome, Safari, Firefox, Edge). Uses the Pointer Events API for the crop tool's drag/resize handles (mouse, touch, and pen all work) and `canvas.toBlob()` for image export, both widely supported.
 
 ## Changelog
+
+### 1.2.0 — 2026-09-08
+- Added SVG support for the favicon generator. Since each output size is drawn fresh from the original source (never from a cached intermediate raster), an SVG source already produced crisp results at every size without any special-casing
+- Added a Photos/Files toggle above the upload area (matching JPG75's Bilder/Dateien toggle, in English): the default "Photos" mode uses the OS photo picker, which on mobile typically excludes SVGs; switching to "Files" opens the general file browser instead
+- Generating icons now shows a friendly error instead of failing silently if a source SVG references external images/fonts, which can taint the canvas in some browsers
 
 ### 1.1.1 — 2026-09-08
 - Renamed "Baukasten" to **Web Card House** and marked it as beta (badge on the home screen card, noted in the About modal) — the current layout is a functional first pass and is due for a visual rework

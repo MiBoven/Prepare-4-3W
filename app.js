@@ -153,6 +153,22 @@ optionIds.forEach(id => {
 loadOptions();
 
 // ---------- File loading ----------
+const sourceToggle = document.getElementById('sourceToggle');
+const sourceHint = document.getElementById('sourceHint');
+const sourceHints = {
+  images: 'Photo picker — fast, but SVGs and other non-photo files may not show up here.',
+  files: 'File browser — slower to open, but shows every file type, including SVGs.'
+};
+sourceToggle.addEventListener('click', (e) => {
+  const btn = e.target.closest('.seg-btn');
+  if (!btn) return;
+  sourceToggle.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const mode = btn.dataset.mode;
+  fileInput.accept = mode === 'files' ? '*/*' : 'image/*';
+  sourceHint.textContent = sourceHints[mode];
+});
+
 drop.addEventListener('click', () => fileInput.click());
 ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
   e.preventDefault(); drop.classList.add('drag');
@@ -448,6 +464,8 @@ generateBtn.addEventListener('click', async () => {
   generateBtn.disabled = true;
   try {
     await generateAll();
+  } catch (err) {
+    alert('Something went wrong generating the icons. If you used an SVG that references external images or fonts, try a self-contained SVG (or a raster image) instead.');
   } finally {
     generateBtn.disabled = false;
   }
